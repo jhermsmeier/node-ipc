@@ -3,7 +3,8 @@
 const Defaults = require('../entities/Defaults.js'),
     Client = require('../dao/client.js'),
     Server = require('../dao/socketServer.js'),
-    util = require('util');
+    util = require('util'),
+    path = require('path');
 
 class IPC{
     constructor(){
@@ -102,18 +103,18 @@ function disconnect(id){
     delete this.of[id];
 }
 
-function serve(path,callback){
-    if(typeof path=='function'){
-        callback=path;
-        path=false;
+function serve(socketPath,callback){
+    if(typeof socketPath=='function'){
+        callback=socketPath;
+        socketPath=false;
     }
-    if(!path){
+    if(!socketPath){
+        socketPath=path.join(this.config.socketRoot, this.config.appspace + this.config.id);
         this.log(
             'Server path not specified, so defaulting to',
             'ipc.config.socketRoot + ipc.config.appspace + ipc.config.id',
-            this.config.socketRoot+this.config.appspace+this.config.id
+            socketPath
         );
-        path=this.config.socketRoot+this.config.appspace+this.config.id;
     }
 
     if(!callback){
@@ -121,7 +122,7 @@ function serve(path,callback){
     }
 
     this.server=new Server(
-        path,
+        socketPath,
         this.config,
         log
     );
@@ -213,10 +214,10 @@ function serveNet(host,port,UDPType,callback){
     );
 }
 
-function connect(id,path,callback){
-    if(typeof path == 'function'){
-        callback=path;
-        path=false;
+function connect(id,socketPath,callback){
+    if(typeof socketPath == 'function'){
+        callback=socketPath;
+        socketPath=false;
     }
 
     if(!callback){
@@ -231,13 +232,13 @@ function connect(id,path,callback){
         return;
     }
 
-    if(!path){
+    if(!socketPath){
+        socketPath=path.join(this.config.socketRoot, this.config.appspace + id);
         this.log(
             'Service path not specified, so defaulting to',
             'ipc.config.socketRoot + ipc.config.appspace + id',
-            (this.config.socketRoot+this.config.appspace+id).data
+            socketPath
         );
-        path=this.config.socketRoot+this.config.appspace+id;
     }
 
     if(this.of[id]){
@@ -255,7 +256,7 @@ function connect(id,path,callback){
 
     this.of[id] = new Client(this.config,this.log);
     this.of[id].id = id;
-    this.of[id].path = path;
+    this.of[id].path = socketPath;
 
     this.of[id].connect();
 

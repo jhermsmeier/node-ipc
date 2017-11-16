@@ -5,6 +5,7 @@ const net = require('net'),
     EventParser = require('../entities/EventParser.js'),
     Message = require('js-message'),
     fs = require('fs'),
+    path = require('path'),
     Queue = require('js-queue');
 
 let Events = require('event-pubsub/es5');
@@ -82,9 +83,9 @@ function connect(){
         options.path=client.path;
 
         if (process.platform ==='win32' && !client.path.startsWith('\\\\.\\pipe\\')){
-            options.path = options.path.replace(/^\//, '');
-            options.path = options.path.replace(/\//g, '-');
-            options.path= `\\\\.\\pipe\\${options.path}`;
+            options.path = options.path.replace(/^[\/\\]/, '');
+            options.path = options.path.replace(/[\/\\]/g, '-');
+            options.path = path.join('\\\\.\\pipe\\', options.path);
         }
 
         client.socket = net.connect(options);

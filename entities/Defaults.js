@@ -22,7 +22,7 @@ class Defaults{
     constructor(){
 
         this.appspace='app.';
-        this.socketRoot='/tmp/';
+        this.socketRoot=os.tmpdir();
         this.id=os.hostname();
 
         this.encoding='utf8';
